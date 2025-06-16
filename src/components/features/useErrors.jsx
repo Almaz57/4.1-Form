@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const errValid = {
 	email: {
@@ -34,6 +34,8 @@ export const useErrors = (updateState, submitButtonRef, password, repeatPassword
 	const [emailError, setEmailError] = useState(null);
 	const [passwordError, setPasswordError] = useState(null);
 	const [repeatPasswordError, setRepeatPasswordError] = useState(null);
+	const [isValid, setIsValid] = useState(false);
+	//const [emailError, setEmailError] = useState(null);
 
 	const onEmailChange = (email) => {
 		const regex = errValid.email.regex.value;
@@ -57,12 +59,12 @@ export const useErrors = (updateState, submitButtonRef, password, repeatPassword
 		if (!password) newError = errValid.pass.absent.msg;
 		setPasswordError(newError);
 	};
-
+	//let isValid = false;
 	const onRepeatPasswordChange = (pass) => {
 		let newError = null;
 		if (pass !== password && pass !== repeatPassword) newError = errValid.repPass.match.msg;
 		setRepeatPasswordError(newError);
-		if (!emailError && !newError) setTimeout(() => submitButtonRef.current.focus(), 0);
+		//if (!emailError && !newError) isValid = true;
 	};
 
 	const onChange = ({ target }) => {
@@ -71,6 +73,24 @@ export const useErrors = (updateState, submitButtonRef, password, repeatPassword
 		if (target.name === 'password') onPasswordChange(target.value);
 		if (target.name !== 'email') onRepeatPasswordChange(target.value);
 	};
+
+	useEffect(() => {
+		const newIsValid =
+			!emailError &&
+			!passwordError &&
+			!repeatPasswordError &&
+			password &&
+			repeatPassword &&
+			password === repeatPassword;
+		setIsValid(newIsValid);
+	}, [emailError, passwordError, repeatPasswordError, password, repeatPassword]);
+
+	useEffect(() => {
+		if (isValid) {
+			console.log('isValid');
+			submitButtonRef.current?.focus();
+		}
+	}, [isValid]);
 
 	return {
 		onChange,
